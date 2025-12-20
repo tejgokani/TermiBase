@@ -437,13 +437,13 @@ brew uninstall termibase
 pip uninstall termibase
 ```
 
-## 📝 License
+## License
 
-MIT License - see LICENSE file for details
+TermiBase is **source-available**.
+You are free to use and study the code, but modification and redistribution
+are not permitted without explicit permission.
 
-## 🤝 Contributing
 
-Contributions welcome! Please feel free to submit a Pull Request.
 
 ## 🙏 Acknowledgments
 
