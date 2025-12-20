@@ -86,6 +86,11 @@ def repl(
     
     visualizer = QueryVisualizer()
     simulator = ExecutionSimulator(storage)
+    input_handler = QueryInputHandler()
+    
+    # Track uncommitted changes
+    has_uncommitted_changes = False
+    has_successful_query = False
     
     console.print("\n")
     console.print(Panel.fit(
@@ -93,7 +98,8 @@ def repl(
         border_style="cyan"
     ))
     console.print("\n[dim]💡 Tip: Type SQL queries to see how they're executed step-by-step[/dim]")
-    console.print("[dim]   Use [cyan].help[/cyan] for commands, [cyan].exit[/cyan] to quit[/dim]\n")
+    console.print("[dim]   Use [cyan].help[/cyan] for commands, [cyan].exit[/cyan] to quit[/dim]")
+    console.print("[dim]   Write multi-line queries (end with ';') or use arrow keys for history[/dim]\n")
     
     show_explain = explain
     
@@ -101,10 +107,13 @@ def repl(
     
     while True:
         try:
-            # More conversational prompt
-            prompt_text = "[bold cyan]termibase>[/bold cyan]" if query_count == 0 else "[bold cyan]termibase>[/bold cyan]"
-            query = Prompt.ask(prompt_text, default="")
+            # Get query using multi-line input handler
+            query = input_handler.get_multiline_query("[bold cyan]termibase>[/bold cyan]")
             query_count += 1
+            
+            if query is None:
+                # User cancelled input
+                continue
             
             if not query.strip():
                 continue
@@ -114,17 +123,54 @@ def repl(
                 cmd = query[1:].strip().lower()
                 
                 if cmd in ('exit', 'quit'):
+                    # Check for uncommitted changes
+                    if has_uncommitted_changes and has_successful_query:
+                        console.print("\n[yellow]⚠️  You have uncommitted changes![/yellow]")
+                        console.print("[dim]Use [cyan].commit[/cyan] to save your work, or [cyan].rollback[/cyan] to discard[/dim]")
+                        response = Prompt.ask("\n[cyan]Commit changes before exiting?[/cyan] (yes/no)", default="yes")
+                        if response.lower() in ('yes', 'y'):
+                            try:
+                                storage.conn.commit()
+                                console.print("[green]✓ Changes committed successfully[/green]")
+                                has_uncommitted_changes = False
+                            except Exception as e:
+                                console.print(f"[red]Error committing: {str(e)}[/red]")
+                        else:
+                            console.print("[yellow]Changes not committed. Exiting...[/yellow]")
                     break
                 elif cmd == 'help':
                     console.print("\n[bold cyan]📚 TermiBase Commands[/bold cyan]\n")
                     console.print("  [cyan].help[/cyan]     - Show this help")
                     console.print("  [cyan].learn[/cyan]    - Interactive SQL learning mode")
                     console.print("  [cyan].explain[/cyan]  - Toggle execution plan display")
+                    console.print("  [cyan].commit[/cyan]   - Commit pending changes")
+                    console.print("  [cyan].rollback[/cyan] - Rollback pending changes")
                     console.print("  [cyan].tables[/cyan]   - List all tables")
                     console.print("  [cyan].schema[/cyan]   - Show table schemas")
                     console.print("  [cyan].examples[/cyan] - Show example queries")
                     console.print("  [cyan].exit[/cyan]     - Exit REPL")
-                    console.print("\n[dim]💡 Just type SQL queries to execute them![/dim]\n")
+                    console.print("\n[dim]💡 Write multi-line queries (end with ';')[/dim]")
+                    console.print("[dim]💡 Use ↑↓ arrow keys for command history[/dim]\n")
+                elif cmd == 'commit':
+                    if has_uncommitted_changes:
+                        try:
+                            storage.conn.commit()
+                            console.print("[green]✓ Changes committed successfully[/green]")
+                            has_uncommitted_changes = False
+                        except Exception as e:
+                            console.print(f"[red]Error committing: {str(e)}[/red]")
+                    else:
+                        console.print("[dim]No uncommitted changes to commit[/dim]")
+                elif cmd == 'rollback':
+                    if has_uncommitted_changes:
+                        try:
+                            storage.conn.rollback()
+                            console.print("[yellow]✓ Changes rolled back[/yellow]")
+                            has_uncommitted_changes = False
+                        except Exception as e:
+                            console.print(f"[red]Error rolling back: {str(e)}[/red]")
+                    else:
+                        console.print("[dim]No uncommitted changes to rollback[/dim]")
                 elif cmd == 'learn':
                     # Enter learning mode
                     while True:
@@ -180,6 +226,10 @@ def repl(
             
             # Execute SQL query
             try:
+                # Check if this is a DML statement (INSERT, UPDATE, DELETE)
+                query_upper = query.strip().upper()
+                is_dml = any(query_upper.startswith(cmd) for cmd in ['INSERT', 'UPDATE', 'DELETE', 'CREATE', 'DROP', 'ALTER'])
+                
                 # Show analysis
                 visualizer.show_query_analysis(query)
                 
@@ -197,11 +247,19 @@ def repl(
                 # Execute query
                 results = storage.execute(query)
                 
+                # Track changes
+                if is_dml:
+                    has_uncommitted_changes = True
+                    has_successful_query = True
+                
                 # Show results
                 if results:
                     visualizer.show_results(results)
+                    has_successful_query = True
                 else:
                     console.print("\n[green]✓ Query executed successfully.[/green]")
+                    if is_dml:
+                        console.print("[dim]💡 Use [cyan].commit[/cyan] to save changes or [cyan].rollback[/cyan] to discard[/dim]")
                 
             except Exception as e:
                 console.print(f"\n[bold red]Error:[/bold red] {str(e)}")
@@ -210,6 +268,11 @@ def repl(
             console.print("\n\n[yellow]Interrupted. Use .exit to quit.[/yellow]")
         except EOFError:
             break
+    
+    # Final check for uncommitted changes
+    if has_uncommitted_changes and has_successful_query:
+        console.print("\n[yellow]⚠️  Warning: You have uncommitted changes![/yellow]")
+        console.print("[dim]Your changes will be lost. Use [cyan].commit[/cyan] before exiting next time.[/dim]")
     
     storage.close()
     console.print("\n[bold green]Goodbye![/bold green]")
