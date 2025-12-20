@@ -27,7 +27,7 @@ TermiBase is an educational tool designed to help developers understand database
 brew install termibase
 ```
 
-**Option 2: pip**
+**Option 2: pip (Recommended for Windows)**
 ```bash
 pip install termibase
 ```
