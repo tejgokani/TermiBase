@@ -15,6 +15,7 @@ from termibase.visualizer.renderer import QueryVisualizer
 from termibase.demos.data import setup_demo_data, get_demo_queries
 from termibase.learn.menu import show_learning_menu_simple
 from termibase.learn.lesson import show_lesson
+from termibase.cli.input_handler import QueryInputHandler
 
 app = typer.Typer(
     name="termibase",
