@@ -12,6 +12,7 @@ from termibase.storage.engine import StorageEngine
 from termibase.parser.analyzer import QueryAnalyzer
 from termibase.engine.simulator import ExecutionSimulator
 from termibase.visualizer.renderer import QueryVisualizer
+from termibase.visualizer.banner import print_welcome_banner, print_colorful_blocks
 from termibase.demos.data import setup_demo_data, get_demo_queries
 
 app = typer.Typer(
@@ -85,13 +86,9 @@ def repl(
     visualizer = QueryVisualizer()
     simulator = ExecutionSimulator(storage)
     
-    console.print("\n")
-    console.print(Panel.fit(
-        "[bold cyan]✨ TermiBase[/bold cyan] - Your Database Learning Playground",
-        border_style="cyan"
-    ))
-    console.print("\n[dim]💡 Tip: Type SQL queries to see how they're executed step-by-step[/dim]")
-    console.print("[dim]   Use [cyan].help[/cyan] for commands, [cyan].exit[/cyan] to quit[/dim]\n")
+    # Print colorful welcome banner (Gemini-style)
+    print_colorful_blocks()
+    print_welcome_banner()
     
     show_explain = explain
     

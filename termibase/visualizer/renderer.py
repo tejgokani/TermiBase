@@ -17,6 +17,11 @@ class QueryVisualizer:
     def __init__(self):
         """Initialize visualizer."""
         self.console = Console()
+        # Get terminal width, with fallback
+        try:
+            self.terminal_width = self.console.width
+        except:
+            self.terminal_width = 80
 
     def show_query_analysis(self, query: str) -> None:
         """Display query analysis.
@@ -29,13 +34,27 @@ class QueryVisualizer:
         
         # Show parsed query
         self.console.print("\n[bold cyan]Query Analysis[/bold cyan]")
-        self.console.print(Panel(Syntax(query, "sql", theme="monokai"), 
-                                title="SQL Query", border_style="blue"))
+        # Use Panel with proper width handling to prevent overlap
+        # Calculate safe width (leave margins for borders, padding, and title)
+        safe_width = min(self.terminal_width - 8, 120)  # Leave 8 chars for margins and title
+        syntax = Syntax(query, "sql", theme="monokai", word_wrap=True, line_numbers=False)
+        # Use Panel.fit() to auto-adjust to content, preventing overlap
+        panel = Panel.fit(syntax, 
+                         title="[bold blue]SQL Query[/bold blue]", 
+                         border_style="blue",
+                         padding=(1, 2))
+        # Ensure it doesn't exceed terminal width
+        if safe_width < self.terminal_width:
+            self.console.print(panel, width=safe_width)
+        else:
+            self.console.print(panel)
         
-        # Create analysis table
-        table = Table(title="Query Structure", show_header=True, header_style="bold magenta")
-        table.add_column("Property", style="cyan")
-        table.add_column("Value", style="green")
+        # Create analysis table with width constraints
+        safe_width = min(self.terminal_width - 4, 120)
+        table = Table(title="Query Structure", show_header=True, header_style="bold magenta", 
+                     width=safe_width, show_lines=False)
+        table.add_column("Property", style="cyan", width=20, overflow="fold")
+        table.add_column("Value", style="green", overflow="fold")
         
         table.add_row("Query Type", analysis['type'])
         table.add_row("Tables", ", ".join(analysis['tables']) if analysis['tables'] else "None")
@@ -108,12 +127,13 @@ class QueryVisualizer:
         """
         self.console.print("\n[bold green]Execution Steps[/bold green]")
         
-        table = Table(show_header=True, header_style="bold magenta")
-        table.add_column("Step", style="cyan", width=8)
-        table.add_column("Operation", style="green")
-        table.add_column("Description", style="white")
-        table.add_column("Cost", style="yellow", justify="right")
-        table.add_column("Rows", style="blue", justify="right")
+        safe_width = min(self.terminal_width - 4, 120)
+        table = Table(show_header=True, header_style="bold magenta", width=safe_width, show_lines=False)
+        table.add_column("Step", style="cyan", width=6, overflow="fold")
+        table.add_column("Operation", style="green", width=12, overflow="fold")
+        table.add_column("Description", style="white", overflow="fold")
+        table.add_column("Cost", style="yellow", justify="right", width=8)
+        table.add_column("Rows", style="blue", justify="right", width=8)
         
         for i, step in enumerate(steps, 1):
             table.add_row(
@@ -151,9 +171,14 @@ class QueryVisualizer:
         else:
             columns = [f"Column_{i+1}" for i in range(len(results[0]))]
         
-        table = Table(show_header=True, header_style="bold magenta")
+        safe_width = min(self.terminal_width - 4, 120)
+        # Calculate column width based on number of columns
+        num_cols = len(columns)
+        col_width = max(10, (safe_width - (num_cols * 3)) // num_cols) if num_cols > 0 else 20
+        
+        table = Table(show_header=True, header_style="bold magenta", width=safe_width, show_lines=False)
         for col in columns:
-            table.add_column(col, style="cyan")
+            table.add_column(col, style="cyan", width=col_width, overflow="fold")
         
         for row in results[:limit]:
             if hasattr(row, 'values'):
