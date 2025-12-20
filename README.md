@@ -2,169 +2,317 @@
 
 A terminal-native database learning playground that lets you run SQL queries and observe how they're parsed, planned, and executed—all from your command line.
 
-**Install in one command:** `pip install termibase`  
+**Install in one command:** `brew install tejgokani/termibase/termibase` or `pip install termibase`  
 **Use immediately:** Just type `termibase` and start querying!
 
 ## 🎯 What is TermiBase?
 
 TermiBase is an educational tool designed to help developers understand database internals by providing:
 - **Interactive SQL REPL** with real-time query analysis
+- **Multi-line query support** (SQL*Plus style) - write queries across multiple lines
+- **Command history** with arrow key navigation (↑↓)
 - **Execution plan visualization** showing how queries are processed step-by-step
 - **Query optimization suggestions** to learn best practices
+- **Interactive learning mode** (`.learn`) with guided SQL lessons
+- **Commit/rollback tracking** to manage database changes
 - **Beautiful terminal UI** using Rich for a modern CLI experience
 - **No browser required** - everything runs in your terminal
 
 ## 🚀 Quick Start
 
-### One-Command Installation
+### Installation
 
+**Option 1: Homebrew (Recommended for macOS)**
+```bash
+brew install tejgokani/termibase/termibase
+```
+
+**Option 2: pip**
 ```bash
 pip install termibase
 ```
 
-That's it! Now you can use TermiBase:
-
-```bash
-termibase          # Launch interactive REPL (Gemini-like experience)
-termibase init     # Initialize database (auto-runs on first launch)
-termibase --help   # See all commands
-```
-
-### Alternative Installation Methods
-
-**Using pip3:**
+**Option 3: pip3**
 ```bash
 pip3 install termibase
 ```
 
-**Using python3 -m pip:**
-```bash
-python3 -m pip install termibase
-```
-
-**Using pipx (recommended for CLI tools):**
+**Option 4: pipx (Recommended for CLI tools)**
 ```bash
 pipx install termibase
 ```
 
-**For development (clone repo):**
+### First Use
+
+Simply run:
 ```bash
-git clone https://github.com/yourusername/termibase.git
-cd termibase
-python3 -m venv venv
-source venv/bin/activate
-pip install -e .
+termibase
 ```
 
-**Note:** On macOS with Homebrew Python, you may need to use a virtual environment or `pipx` to avoid externally-managed environment errors.
+The database will be automatically initialized on first run. You'll see:
 
-### First Steps
+```
+✨ TermiBase - Your Database Learning Playground
 
-```bash
-# Initialize a sandbox database
-termibase init
+💡 Tip: Type SQL queries to see how they're executed step-by-step
+   Use .help for commands, .exit to quit
+   Write multi-line queries (end with ';') or use arrow keys for history
 
-# Launch interactive SQL REPL
-termibase repl
-
-# Or run a query directly
-termibase run "SELECT * FROM users WHERE age > 25"
-
-# See execution plan without running
-termibase explain "SELECT * FROM users JOIN orders ON users.id = orders.user_id"
-
-# Run educational demos
-termibase demo
+termibase> 
 ```
 
-## 📖 Usage
+## 📖 Features
 
-### Interactive REPL
+### 1. Multi-Line Query Input
 
-The REPL provides a full-featured SQL shell with built-in commands:
+Write SQL queries across multiple lines, just like SQL*Plus:
 
-```bash
-termibase repl
-```
-
-**REPL Commands:**
-- `.help` - Show help
-- `.explain` - Toggle execution plan display
-- `.tables` - List all tables
-- `.schema` - Show table schemas
-- `.exit` or `.quit` - Exit REPL
-
-**Example Session:**
 ```sql
-termibase> SELECT * FROM users WHERE age > 28
+termibase> SELECT DISTINCT
+      ->     c.customer_id,
+      ->     c.first_name,
+      ->     c.last_name
+      -> FROM rental r
+      -> INNER JOIN customer c ON r.customer_id = c.customer_id
+      -> WHERE c.city = 'Lethbridge';
+```
 
-Query Analysis
-┌─────────────┬─────────────────────────────┐
-│ Property    │ Value                       │
-├─────────────┼─────────────────────────────┤
-│ Query Type  │ SELECT                      │
-│ Tables      │ users                       │
-│ WHERE       │ age > 28                     │
-└─────────────┴─────────────────────────────┘
+End your query with `;` to execute. Use `\` on an empty line to cancel.
 
+### 2. Command History
+
+Navigate your query history using arrow keys:
+- **↑** - Previous query
+- **↓** - Next query
+- History is saved to `.termibase_history` and persists across sessions
+
+### 3. Interactive Learning Mode
+
+Learn SQL interactively with guided lessons:
+
+```bash
+termibase> .learn
+```
+
+**Available Topics:**
+1. SELECT Basics
+2. WHERE Clause
+3. JOINs
+4. GROUP BY & Aggregation
+5. ORDER BY
+6. Subqueries
+7. Indexes & Performance
+
+Each lesson includes:
+- Detailed explanations
+- Example queries
+- Practice queries you can run
+- Option to write your own queries
+
+### 4. Commit/Rollback Tracking
+
+TermiBase tracks uncommitted changes and prompts you to save before exiting:
+
+```sql
+termibase> INSERT INTO users (name, age, city) VALUES ('Alice', 25, 'NYC');
+✓ Query executed successfully.
+💡 Use .commit to save changes or .rollback to discard
+
+termibase> .commit
+✓ Changes committed successfully
+```
+
+**Commands:**
+- `.commit` - Save pending changes
+- `.rollback` - Discard pending changes
+
+If you try to exit with uncommitted changes, you'll be prompted to commit.
+
+### 5. Query Analysis & Visualization
+
+Every query is automatically analyzed and visualized:
+
+```sql
+termibase> SELECT * FROM users WHERE age > 28;
+```
+
+**Shows:**
+- Query structure (tables, columns, WHERE conditions)
+- Execution plan (step-by-step processing)
+- Query results (beautifully formatted tables)
+- Optimization suggestions
+
+### 6. Execution Plan Visualization
+
+See how your query is executed internally:
+
+```
 Execution Plan
 Query Execution
 ├── [1] TABLE_SCAN - Scanning table users (cost: 1.00, rows: 8)
-├── [2] FILTER - Applying WHERE filter: age > 28 (cost: 0.30, rows: 30)
-└── [3] PROJECT - Projecting all columns (cost: 0.20, rows: 20)
-
-Query Results
-┌──────┬─────────┬─────┬──────────────┐
-│ id   │ name    │ age │ city         │
-├──────┼─────────┼─────┼──────────────┤
-│ 2    │ Bob     │ 30  │ San Francisco│
-│ 3    │ Charlie │ 35  │ New York     │
-│ 5    │ Eve     │ 32  │ San Francisco│
-│ 8    │ Henry   │ 31  │ Boston       │
-└──────┴─────────┴─────┴──────────────┘
+├── [2] FILTER - Applying WHERE filter: age > 28 (cost: 0.30, rows: 4)
+└── [3] PROJECT - Projecting all columns (cost: 0.20, rows: 4)
 ```
 
-### Command Reference
+## 📚 REPL Commands
 
-#### `termibase init`
-Initialize a new TermiBase sandbox database with demo data.
+Inside the TermiBase REPL, use these commands:
+
+| Command | Description |
+|---------|-------------|
+| `.help` | Show all available commands |
+| `.learn` | Interactive SQL learning mode |
+| `.explain` | Toggle execution plan display on/off |
+| `.commit` | Commit pending database changes |
+| `.rollback` | Rollback pending database changes |
+| `.tables` | List all tables in the database |
+| `.schema` | Show table schemas |
+| `.examples` | Show example queries |
+| `.exit` or `.quit` | Exit REPL |
+
+## 🎮 Usage Examples
+
+### Basic Queries
+
+```sql
+-- Simple select
+SELECT * FROM users LIMIT 5;
+
+-- Filtering
+SELECT name, age FROM users WHERE age > 28;
+
+-- Grouping
+SELECT city, COUNT(*) as count FROM users GROUP BY city;
+
+-- Joins
+SELECT u.name, o.amount 
+FROM users u 
+JOIN orders o ON u.id = o.user_id;
+```
+
+### Multi-Line Complex Query
+
+```sql
+termibase> SELECT DISTINCT
+      ->     c.customer_id,
+      ->     c.first_name,
+      ->     c.last_name,
+      ->     c.email,
+      ->     s.store_id
+      -> FROM rental r
+      -> INNER JOIN staff st ON st.staff_id = r.staff_id
+      -> INNER JOIN store s ON s.manager_staff_id = st.staff_id 
+      ->     AND s.store_id = st.store_id
+      -> INNER JOIN customer c ON r.customer_id = c.customer_id 
+      ->     AND s.store_id = c.store_id
+      -> INNER JOIN address a ON s.address_id = a.address_id
+      -> INNER JOIN city ci ON ci.city_id = a.city_id
+      -> WHERE ci.city = 'Lethbridge';
+```
+
+### Using Learning Mode
+
+```bash
+termibase> .learn
+
+📚 SQL Learning Topics
+
+#  Topic                        Description
+─────────────────────────────────────────────────────────────────────
+1  SELECT Basics               Learn the fundamentals of SELECT queries
+2  WHERE Clause                Filter data using WHERE conditions
+3  JOINs                       Combine data from multiple tables
+4  GROUP BY & Aggregation      Group data and use aggregate functions
+5  ORDER BY                    Sort query results
+6  Subqueries                  Nested queries and subqueries
+7  Indexes & Performance       Understand indexes and query optimization
+
+Select a topic (1-7) or 'q' to quit: 3
+
+📖 JOINs
+
+Explanation:
+JOINs combine rows from two or more tables.
+
+Types:
+  • INNER JOIN - Returns matching rows from both tables
+  • LEFT JOIN - Returns all rows from left table + matching from right
+  ...
+
+Options:
+  1 - Run practice query
+  2 - Write your own query
+  3 - See execution plan
+  4 - Back to topics
+```
+
+## 🛠️ Command-Line Commands
+
+### `termibase` (No Arguments)
+Launches interactive REPL - the main way to use TermiBase.
+
+```bash
+termibase
+```
+
+### `termibase init`
+Initialize or reset the sandbox database with demo data.
 
 ```bash
 termibase init
 termibase init --db-path ./my-db.db
 ```
 
-#### `termibase repl`
-Launch an interactive SQL REPL with query visualization.
+### `termibase repl`
+Explicitly launch REPL (same as `termibase`).
 
 ```bash
 termibase repl
 termibase repl --explain  # Always show execution plans
 ```
 
-#### `termibase run`
+### `termibase run`
 Execute a single query with full visualization.
 
 ```bash
-termibase run "SELECT * FROM users"
+termibase run "SELECT * FROM users WHERE age > 25"
 termibase run "SELECT * FROM users" --no-explain  # Skip execution plan
 ```
 
-#### `termibase explain`
+### `termibase explain`
 Show execution plan for a query without running it.
 
 ```bash
-termibase explain "SELECT * FROM users WHERE city = 'New York'"
+termibase explain "SELECT * FROM users JOIN orders ON users.id = orders.user_id"
 ```
 
-#### `termibase demo`
+### `termibase demo`
 Run educational demo queries.
 
 ```bash
 termibase demo              # Run all demos
 termibase demo basics       # Run specific demo
-termibase demo joins        # Run joins demo
 ```
+
+## 🎓 Demo Data
+
+TermiBase comes with pre-loaded demo data:
+
+**Users Table:**
+- `id` (INTEGER PRIMARY KEY)
+- `name` (TEXT)
+- `age` (INTEGER)
+- `city` (TEXT)
+
+**Orders Table:**
+- `id` (INTEGER PRIMARY KEY)
+- `user_id` (INTEGER, FOREIGN KEY)
+- `amount` (REAL)
+- `date` (TEXT)
+
+**Indexes:**
+- `idx_users_city` on `users(city)`
+- `idx_orders_user_id` on `orders(user_id)`
 
 ## 🏗️ Architecture
 
@@ -173,21 +321,26 @@ TermiBase is built with a modular architecture:
 ```
 termibase/
 ├── cli/          # Command-line interface (Typer)
-├── parser/       # SQL parsing and analysis
+│   ├── main.py    # Main CLI commands
+│   └── input_handler.py  # Multi-line input & history
+├── parser/        # SQL parsing and analysis
 ├── engine/       # Query execution simulation
 ├── visualizer/   # Rich-based terminal rendering
 ├── storage/      # SQLite wrapper
+├── learn/        # Interactive learning module
 └── demos/        # Educational examples
 ```
 
 ### Key Components
 
 - **CLI Interface**: Handles commands, flags, and REPL loop
+- **Input Handler**: Multi-line query input with readline history support
 - **SQL Parser**: Parses SQL into tokens and AST using `sqlparse`
 - **Query Analyzer**: Identifies query type, tables, indexes, joins
 - **Execution Simulator**: Simulates logical execution steps
 - **Storage Engine**: SQLite wrapper for actual query execution
 - **Visualizer**: Renders execution plans and results using Rich
+- **Learning Module**: Interactive SQL lessons and practice
 
 ## 📚 Educational Features
 
@@ -217,34 +370,21 @@ Get tips on improving your queries:
 - Large result set alerts
 - Join optimization hints
 
-## 🎓 Demo Data
-
-TermiBase comes with pre-loaded demo data:
-
-**Users Table:**
-- id, name, age, city
-
-**Orders Table:**
-- id, user_id, amount, date
-
-**Indexes:**
-- `idx_users_city` on `users(city)`
-- `idx_orders_user_id` on `orders(user_id)`
-
-## 🛠️ Development
+## 🔧 Development
 
 ### Setup Development Environment
 
 ```bash
 # Clone repository
-git clone https://github.com/yourusername/termibase.git
-cd termibase
+git clone https://github.com/tejgokani/TermiBase.git
+cd TermiBase
+
+# Create virtual environment
+python3 -m venv venv
+source venv/bin/activate  # On Windows: venv\Scripts\activate
 
 # Install in editable mode
 pip install -e .
-
-# Install development dependencies
-pip install -e ".[dev]"
 ```
 
 ### Running Tests
@@ -253,36 +393,49 @@ pip install -e ".[dev]"
 pytest termibase/tests/
 ```
 
-### Project Structure
-
-```
-TermiBase/
-├── termibase/
-│   ├── cli/
-│   │   └── main.py          # CLI commands
-│   ├── parser/
-│   │   └── analyzer.py      # SQL analysis
-│   ├── engine/
-│   │   └── simulator.py     # Execution simulation
-│   ├── visualizer/
-│   │   └── renderer.py      # Rich rendering
-│   ├── storage/
-│   │   └── engine.py        # SQLite wrapper
-│   ├── demos/
-│   │   └── data.py          # Demo data
-│   └── tests/               # Test suite
-├── pyproject.toml           # Package config
-├── requirements.txt         # Dependencies
-└── README.md               # This file
-```
-
 ## 🎨 Design Philosophy
 
 - **Terminal-first**: Everything works in the terminal, no browser needed
 - **Educational**: Transparent about how queries are processed
 - **Fast feedback**: Immediate visualization of query execution
 - **Developer-centric**: Built for developers learning databases
-- **Opinionated**: Provides clear suggestions and best practices
+- **Interactive**: Multi-line queries, history, and guided learning
+- **Safe**: Commit/rollback tracking prevents accidental data loss
+
+## 📝 Requirements
+
+- Python 3.8 or higher
+- SQLite (included with Python)
+
+## 🌐 Platform Support
+
+- ✅ macOS
+- ✅ Linux
+- ✅ Windows (with WSL recommended)
+
+## 🔄 Update TermiBase
+
+**Homebrew:**
+```bash
+brew upgrade termibase
+```
+
+**pip:**
+```bash
+pip install --upgrade termibase
+```
+
+## 🗑️ Uninstall
+
+**Homebrew:**
+```bash
+brew uninstall termibase
+```
+
+**pip:**
+```bash
+pip uninstall termibase
+```
 
 ## 📝 License
 
@@ -300,7 +453,11 @@ Built with:
 - [sqlparse](https://github.com/andialbrecht/sqlparse) - SQL parsing
 - [SQLite](https://www.sqlite.org/) - Embedded database
 
+## 📞 Support
+
+- **Issues**: [GitHub Issues](https://github.com/tejgokani/TermiBase/issues)
+- **Documentation**: This README
+
 ---
 
 **Happy Learning!** 🎉
-
