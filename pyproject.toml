@@ -1,0 +1,43 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "termibase"
+version = "0.1.0"
+description = "A terminal-native database learning playground"
+readme = "README.md"
+requires-python = ">=3.8"
+license = {text = "MIT"}
+authors = [
+    {name = "TermiBase Contributors"}
+]
+keywords = ["database", "sql", "education", "cli", "terminal"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Education",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+]
+
+dependencies = [
+    "typer>=0.9.0",
+    "rich>=13.0.0",
+    "sqlparse>=0.4.4",
+]
+
+[project.scripts]
+termibase = "termibase.cli.main:main"
+
+[tool.setuptools]
+packages = ["termibase", "termibase.cli", "termibase.parser", "termibase.engine", 
+            "termibase.visualizer", "termibase.storage", "termibase.demos", "termibase.tests"]
+
+[tool.setuptools.package-data]
+termibase = ["demos/*.sql"]
+

@@ -1,0 +1,36 @@
+╔══════════════════════════════════════════════════════════════╗
+║         HOMEBREW INSTALLATION - QUICK SETUP                 ║
+╚══════════════════════════════════════════════════════════════╝
+
+STEP 1: Create Homebrew Tap Repo
+─────────────────────────────────
+Create GitHub repo: homebrew-termibase
+(Note: MUST start with "homebrew-")
+
+STEP 2: Add Formula
+───────────────────
+1. Copy Formula/termibase.rb to your homebrew-termibase repo
+2. Update "yourusername" in the formula with your GitHub username
+3. Commit and push
+
+STEP 3: Users Install
+─────────────────────
+brew tap yourusername/termibase
+brew install termibase
+
+OR one command:
+brew install yourusername/termibase/termibase
+
+═══════════════════════════════════════════════════════════════
+
+ALTERNATIVE: Install Directly (No Tap Needed)
+──────────────────────────────────────────────
+Users can install directly from your main repo:
+
+brew install --build-from-source \
+  https://raw.githubusercontent.com/yourusername/termibase/main/Formula/termibase.rb
+
+═══════════════════════════════════════════════════════════════
+
+See HOMEBREW_SETUP.md for detailed instructions.
+

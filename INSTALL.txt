@@ -1,0 +1,19 @@
+╔══════════════════════════════════════════════════════════════╗
+║           TERMIBASE - ONE COMMAND INSTALLATION              ║
+╚══════════════════════════════════════════════════════════════╝
+
+📦 INSTALL:
+   pip install termibase
+
+🚀 USE:
+   termibase
+
+That's it! No setup needed. Just type 'termibase' and start querying.
+
+💡 The database initializes automatically on first run.
+
+📚 For more info:
+   - README.md - Full documentation
+   - QUICKSTART.md - Quick examples
+   - INSTALL.md - Detailed installation guide
+
