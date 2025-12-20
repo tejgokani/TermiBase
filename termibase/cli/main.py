@@ -13,6 +13,8 @@ from termibase.parser.analyzer import QueryAnalyzer
 from termibase.engine.simulator import ExecutionSimulator
 from termibase.visualizer.renderer import QueryVisualizer
 from termibase.demos.data import setup_demo_data, get_demo_queries
+from termibase.learn.menu import show_learning_menu_simple
+from termibase.learn.lesson import show_lesson
 
 app = typer.Typer(
     name="termibase",
@@ -116,12 +118,20 @@ def repl(
                 elif cmd == 'help':
                     console.print("\n[bold cyan]📚 TermiBase Commands[/bold cyan]\n")
                     console.print("  [cyan].help[/cyan]     - Show this help")
+                    console.print("  [cyan].learn[/cyan]    - Interactive SQL learning mode")
                     console.print("  [cyan].explain[/cyan]  - Toggle execution plan display")
                     console.print("  [cyan].tables[/cyan]   - List all tables")
                     console.print("  [cyan].schema[/cyan]   - Show table schemas")
                     console.print("  [cyan].examples[/cyan] - Show example queries")
                     console.print("  [cyan].exit[/cyan]     - Exit REPL")
                     console.print("\n[dim]💡 Just type SQL queries to execute them![/dim]\n")
+                elif cmd == 'learn':
+                    # Enter learning mode
+                    while True:
+                        topic = show_learning_menu_simple()
+                        if topic is None:
+                            break
+                        show_lesson(topic, storage)
                 elif cmd == 'explain':
                     show_explain = not show_explain
                     console.print(f"[green]Execution plan display: {'ON' if show_explain else 'OFF'}[/green]")

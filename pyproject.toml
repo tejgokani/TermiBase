@@ -35,8 +35,9 @@ dependencies = [
 termibase = "termibase.cli.main:main"
 
 [tool.setuptools]
-packages = ["termibase", "termibase.cli", "termibase.parser", "termibase.engine", 
-            "termibase.visualizer", "termibase.storage", "termibase.demos", "termibase.tests"]
+packages = ["termibase", "termibase.cli", "termibase.parser", "termibase.engine",
+            "termibase.visualizer", "termibase.storage", "termibase.demos", 
+            "termibase.tests", "termibase.learn"]
 
 [tool.setuptools.package-data]
 termibase = ["demos/*.sql"]
