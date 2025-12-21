@@ -22,12 +22,12 @@ TermiBase is an educational tool designed to help developers understand database
 
 ### Installation
 
-**Option 1: Homebrew (Recommended for macOS)**
+**Option 1: Homebrew (Stricitly for MacOS and Linux)**
 ```bash
 brew install termibase
 ```
 
-**Option 2: pip (Recommended for Windows)**
+**Option 2: pip (Strictly for Windows)**
 ```bash
 pip install termibase
 ```
