@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "termibase"
-version = "0.1.4"
+version = "0.1.5"
 description = "A terminal-native database learning playground"
 readme = "README.md"
 requires-python = ">=3.8"
@@ -38,6 +38,7 @@ Issues = "https://github.com/tejgokani/TermiBase/issues"
 
 [project.scripts]
 termibase = "termibase.cli.main:main"
+termibase-setup-windows = "termibase_setup_windows:main"
 
 [tool.setuptools]
 packages = ["termibase", "termibase.cli", "termibase.parser", "termibase.engine",

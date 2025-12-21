@@ -30,8 +30,22 @@ brew install termibase
 **Option 2: pip (Recommended for Windows)**
 ```bash
 pip install termibase
-# After installation, use: python -m termibase
 ```
+
+**Windows Easy Setup (Makes `termibase` command work):**
+After installing with pip, run the setup helper to automatically add to PATH:
+```powershell
+# Option 1: Console command (easiest - included with package)
+termibase-setup-windows
+
+# Option 2: Python module
+python -m termibase.termibase_setup_windows
+
+# Option 3: PowerShell script (download from GitHub)
+powershell -ExecutionPolicy Bypass -File install-windows.ps1
+```
+
+This will automatically add Python Scripts to your PATH so `termibase` command works!
 
 **Option 3: pip3**
 ```bash
@@ -55,7 +69,10 @@ termibase
 python -m termibase
 ```
 
-> **Windows Note:** If the `termibase` command doesn't work, use `python -m termibase` instead. This is because Windows doesn't automatically add Python Scripts to PATH. The `python -m` method works on all systems without PATH configuration.
+> **Windows Note:** 
+> - **Easy way:** Run `install-windows.ps1` after installation to automatically set up PATH
+> - **Manual way:** Use `python -m termibase` (works immediately, no PATH setup needed)
+> - **Why?** Windows doesn't automatically add Python Scripts to PATH, but our installer fixes this!
 
 The database will be automatically initialized on first run. You'll see:
 
