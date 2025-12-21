@@ -34,18 +34,12 @@ pip install termibase
 
 **Windows Easy Setup (Makes `termibase` command work):**
 After installing with pip, run the setup helper to automatically add to PATH:
-```powershell
-# Option 1: Console command (easiest - included with package)
-termibase-setup-windows
-
-# Option 2: Python module
-python -m termibase.termibase_setup_windows
-
-# Option 3: PowerShell script (download from GitHub)
-powershell -ExecutionPolicy Bypass -File install-windows.ps1
+```cmd
+# This works immediately - no PATH needed!
+python -m termibase_setup
 ```
 
-This will automatically add Python Scripts to your PATH so `termibase` command works!
+This will automatically find and add Python Scripts to your PATH so `termibase` command works!
 
 **Option 3: pip3**
 ```bash

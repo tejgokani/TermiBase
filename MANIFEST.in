@@ -1,6 +1,5 @@
 include README.md
 include LICENSE
 include requirements.txt
-include termibase_setup_windows.py
 recursive-include termibase/demos *.sql
 
