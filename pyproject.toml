@@ -4,32 +4,37 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "termibase"
-version = "0.1.0"
+version = "0.1.2"
 description = "A terminal-native database learning playground"
 readme = "README.md"
 requires-python = ">=3.8"
-license = {text = "MIT"}
+license = {text = "Source-Available License (TSAL)"}
 authors = [
-    {name = "TermiBase Contributors"}
+    {name = "Tej Gokani", email = "tejmgokani@gmail.com"}
 ]
 keywords = ["database", "sql", "education", "cli", "terminal"]
 classifiers = [
     "Development Status :: 3 - Alpha",
     "Intended Audience :: Education",
     "Intended Audience :: Developers",
-    "License :: OSI Approved :: MIT License",
+    "License :: Other/Proprietary License",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.8",
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
+    "Operating System :: OS Independent",
 ]
-
 dependencies = [
     "typer>=0.9.0",
     "rich>=13.0.0",
     "sqlparse>=0.4.4",
 ]
+
+[project.urls]
+Homepage = "https://github.com/tejgokani/TermiBase"
+Repository = "https://github.com/tejgokani/TermiBase"
+Issues = "https://github.com/tejgokani/TermiBase/issues"
 
 [project.scripts]
 termibase = "termibase.cli.main:main"

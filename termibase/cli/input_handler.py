@@ -1,10 +1,19 @@
 """Multi-line query input handler with command history."""
 
 import sys
-import readline
 from typing import List, Optional
 from rich.console import Console
 from rich.prompt import Prompt
+
+# Try to import readline (not available on Windows by default)
+try:
+    import readline
+except ImportError:
+    # Windows doesn't have readline - use pyreadline3 if available, otherwise None
+    try:
+        import pyreadline3 as readline
+    except ImportError:
+        readline = None
 
 
 class QueryInputHandler:
@@ -18,6 +27,10 @@ class QueryInputHandler:
     
     def _setup_readline(self):
         """Setup readline for command history."""
+        if readline is None:
+            # readline not available (Windows without pyreadline3)
+            return
+        
         try:
             # Enable readline history
             readline.set_history_length(1000)
@@ -27,15 +40,18 @@ class QueryInputHandler:
                 readline.read_history_file('.termibase_history')
             except FileNotFoundError:
                 pass
-        except (ImportError, AttributeError):
-            # readline not available (Windows)
+        except (AttributeError, OSError):
+            # readline available but setup failed
             pass
     
     def _save_history(self):
         """Save history to file."""
+        if readline is None:
+            return
+        
         try:
             readline.write_history_file('.termibase_history')
-        except (ImportError, AttributeError, IOError):
+        except (AttributeError, IOError, OSError):
             pass
     
     def get_multiline_query(self, prompt: str = "termibase>") -> Optional[str]:
@@ -138,8 +154,9 @@ class QueryInputHandler:
     def clear_history(self):
         """Clear query history."""
         self.history.clear()
-        try:
-            readline.clear_history()
-        except (ImportError, AttributeError):
-            pass
+        if readline is not None:
+            try:
+                readline.clear_history()
+            except AttributeError:
+                pass
 
