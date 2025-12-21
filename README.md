@@ -30,6 +30,7 @@ brew install termibase
 **Option 2: pip (Recommended for Windows)**
 ```bash
 pip install termibase
+# After installation, use: python -m termibase
 ```
 
 **Option 3: pip3**
@@ -44,10 +45,17 @@ pipx install termibase
 
 ### First Use
 
-Simply run:
+**macOS/Linux:**
 ```bash
 termibase
 ```
+
+**Windows:**
+```bash
+python -m termibase
+```
+
+> **Windows Note:** If the `termibase` command doesn't work, use `python -m termibase` instead. This is because Windows doesn't automatically add Python Scripts to PATH. The `python -m` method works on all systems without PATH configuration.
 
 The database will be automatically initialized on first run. You'll see:
 
@@ -409,9 +417,9 @@ pytest termibase/tests/
 
 ## 🌐 Platform Support
 
-- ✅ macOS
-- ✅ Linux
-- ✅ Windows (with WSL recommended)
+- ✅ **macOS** - Install via Homebrew or pip. Use `termibase` command.
+- ✅ **Linux** - Install via pip or pipx. Use `termibase` command.
+- ✅ **Windows** - Install via pip. Use `python -m termibase` (recommended) or add Scripts to PATH for `termibase` command.
 
 ## 🔄 Update TermiBase
 
