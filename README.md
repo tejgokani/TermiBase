@@ -35,7 +35,6 @@ pip install termibase
 **Windows Easy Setup (Makes `termibase` command work):**
 After installing with pip, run the setup helper to automatically add to PATH:
 ```cmd
-# This works immediately - no PATH needed!
 python -m termibase_setup
 ```
 
@@ -60,7 +59,7 @@ termibase
 
 **Windows:**
 ```bash
-python -m termibase
+termibase
 ```
 
 > **Windows Note:** 
