@@ -62,10 +62,7 @@ termibase
 termibase
 ```
 
-> **Windows Note:** 
-> - **Easy way:** Run `install-windows.ps1` after installation to automatically set up PATH
-> - **Manual way:** Use `python -m termibase` (works immediately, no PATH setup needed)
-> - **Why?** Windows doesn't automatically add Python Scripts to PATH, but our installer fixes this!
+
 
 The database will be automatically initialized on first run. You'll see:
 
