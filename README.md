@@ -22,9 +22,15 @@ TermiBase is an educational tool designed to help developers understand database
 
 ### Installation
 
-**Option 1: Homebrew (Stricitly for MacOS and Linux)**
+**Option 1: Homebrew (Strictly for macOS and Linux)**
 ```bash
+brew tap tejgokani/termibase
 brew install termibase
+```
+
+Or in one command:
+```bash
+brew install tejgokani/termibase/termibase
 ```
 
 **Option 2: pip (Strictly for Windows)**
