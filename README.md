@@ -27,7 +27,10 @@ A terminal-based SQL learning and exam-preparation environment designed to simul
 ```bash
 brew install tejgokani/termibase/termibase
 ```
-
+**update**
+```bash
+brew upgrade tejgo
+```
 **Windows (pip):**
 ```bash
 pip install termibase
