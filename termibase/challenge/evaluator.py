@@ -353,3 +353,4 @@ class ChallengeEvaluator:
         else:
             return f"Database error: {error}"
 
+

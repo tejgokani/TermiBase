@@ -550,6 +550,17 @@ def _run_challenge_environment(input_handler: QueryInputHandler, console: Consol
                     else:
                         console.print("[red]No active challenge to reset[/red]")
                 
+                elif cmd == 'sol':
+                    current_challenge = challenge_env.get_current_challenge()
+                    if not current_challenge:
+                        console.print("[red]No active challenge. Start a challenge first.[/red]")
+                    elif not current_challenge.solution_query:
+                        console.print("[yellow]No solution available for this challenge.[/yellow]")
+                    else:
+                        console.print("\n[bold yellow]📋 Solution Query:[/bold yellow]")
+                        console.print(f"[cyan]{current_challenge.solution_query}[/cyan]\n")
+                        console.print("[dim]💡 Try to understand the solution and learn from it![/dim]\n")
+                
                 elif cmd == 'clear-all' or cmd == 'reset-all':
                     # Clear all challenge progress
                     progress = challenge_env.scorer.get_progress()
@@ -579,6 +590,7 @@ def _run_challenge_environment(input_handler: QueryInputHandler, console: Consol
                     console.print("  [cyan].progress[/cyan]      - Show progress")
                     console.print("  [cyan].rank[/cyan]          - Show rank")
                     console.print("  [cyan].reset[/cyan]         - Reset current challenge")
+                    console.print("  [cyan].sol[/cyan]           - Show solution query for current challenge")
                     console.print("  [cyan].clear-all[/cyan]     - Delete all challenge progress")
                     console.print("  [cyan].help[/cyan]          - Show this help")
                     console.print("  [cyan]:exit[/cyan]          - Exit challenge environment\n")
