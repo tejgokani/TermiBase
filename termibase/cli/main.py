@@ -16,6 +16,8 @@ from termibase.demos.data import setup_demo_data, get_demo_queries
 from termibase.learn.menu import show_learning_menu_simple
 from termibase.learn.lesson import show_lesson
 from termibase.cli.input_handler import QueryInputHandler
+from termibase.challenge.environment import ChallengeEnvironment
+from termibase.challenge.visualizer import ChallengeVisualizer
 
 app = typer.Typer(
     name="termibase",
@@ -149,6 +151,7 @@ def repl(
                     console.print("  [cyan].tables[/cyan]   - List all tables")
                     console.print("  [cyan].schema[/cyan]   - Show table schemas")
                     console.print("  [cyan].examples[/cyan] - Show example queries")
+                    console.print("  [cyan].challenge[/cyan] - Enter challenge environment")
                     console.print("  [cyan].exit[/cyan]     - Exit REPL")
                     console.print("\n[dim]💡 Write multi-line queries (end with ';')[/dim]")
                     console.print("[dim]💡 Use ↑↓ arrow keys for command history[/dim]\n")
@@ -220,6 +223,10 @@ def repl(
                     for i, (query, desc) in enumerate(examples, 1):
                         console.print(f"  {i}. [cyan]{query}[/cyan]")
                         console.print(f"     [dim]{desc}[/dim]\n")
+                elif cmd.startswith('challenge'):
+                    # Enter challenge environment
+                    _run_challenge_environment(input_handler, console)
+                    continue
                 else:
                     console.print(f"[red]❌ Unknown command: {cmd}[/red]")
                     console.print("[dim]Type .help for available commands[/dim]")
@@ -448,6 +455,189 @@ def demo(
                     break
     
     storage.close()
+
+
+def _run_challenge_environment(input_handler: QueryInputHandler, console: Console) -> None:
+    """Run the challenge environment REPL.
+    
+    Args:
+        input_handler: Query input handler
+        console: Rich console instance
+    """
+    challenge_env = ChallengeEnvironment()
+    challenge_visualizer = ChallengeVisualizer(challenge_env.scorer)
+    visualizer = QueryVisualizer()
+    
+    # Track last query for submission
+    last_query = None
+    
+    # Enter challenge environment
+    challenge_env.enter()
+    
+    while challenge_env.is_active():
+        try:
+            # Get input with challenge prompt
+            prompt = "[bold cyan](termibase:challenge)>[/bold cyan]"
+            query = input_handler.get_multiline_query(prompt)
+            
+            if query is None:
+                continue
+            
+            if not query.strip():
+                continue
+            
+            # Handle exit command (before other processing)
+            if query.strip() == ':exit':
+                challenge_env.exit()
+                break
+            
+            # Handle challenge commands (simplified - no need for .challenge prefix)
+            if query.startswith('.'):
+                cmd_parts = query[1:].strip().lower().split()
+                cmd = cmd_parts[0] if cmd_parts else ""
+                
+                # Direct commands in challenge environment
+                if cmd == 'list':
+                    # Check for filter argument
+                    difficulty_filter = None
+                    if len(cmd_parts) > 1:
+                        filter_arg = cmd_parts[1].lower()
+                        if filter_arg in ['easy', 'medium', 'hard']:
+                            difficulty_filter = filter_arg
+                        else:
+                            console.print(f"[yellow]Invalid filter: {filter_arg}. Use: easy, medium, or hard[/yellow]")
+                            console.print("[dim]Usage: .list [easy|medium|hard][/dim]")
+                    
+                    challenges = challenge_env.bank.list_challenges()
+                    completed = challenge_env.scorer.get_progress().challenges_completed
+                    challenge_visualizer.show_challenge_list(challenges, completed, difficulty_filter)
+                
+                elif cmd == 'start':
+                    if len(cmd_parts) < 2:
+                        console.print("[red]Usage: .start <id>[/red]")
+                    else:
+                        try:
+                            challenge_id = int(cmd_parts[1])
+                            challenge_env.start_challenge(challenge_id)
+                        except ValueError:
+                            console.print("[red]Invalid challenge ID[/red]")
+                        except Exception as e:
+                            console.print(f"[red]Error starting challenge: {str(e)}[/red]")
+                
+                elif cmd == 'submit':
+                    current_challenge = challenge_env.get_current_challenge()
+                    if not current_challenge:
+                        console.print("[red]No active challenge. Start a challenge first.[/red]")
+                    elif not last_query:
+                        console.print("[red]No query to submit. Write a query first.[/red]")
+                    else:
+                        result = challenge_env.submit_solution(last_query)
+                
+                elif cmd == 'stats':
+                    challenge_visualizer.show_stats()
+                
+                elif cmd == 'progress':
+                    challenge_visualizer.show_progress()
+                
+                elif cmd == 'rank':
+                    challenge_visualizer.show_rank_info()
+                
+                elif cmd == 'reset':
+                    if challenge_env.get_current_challenge():
+                        response = Prompt.ask("[yellow]Reset current challenge? (y/n)[/yellow]", default="n")
+                        if response.lower() == 'y':
+                            challenge_env.reset_challenge()
+                    else:
+                        console.print("[red]No active challenge to reset[/red]")
+                
+                elif cmd == 'clear-all' or cmd == 'reset-all':
+                    # Clear all challenge progress
+                    progress = challenge_env.scorer.get_progress()
+                    if progress.total_attempts == 0:
+                        console.print("[yellow]No progress to clear. You haven't attempted any challenges yet.[/yellow]")
+                    else:
+                        console.print("\n[bold red]⚠️  WARNING: This will delete ALL challenge progress![/bold red]")
+                        console.print(f"[yellow]This includes:[/yellow]")
+                        console.print(f"  • {progress.total_attempts} total attempts")
+                        console.print(f"  • {progress.perfect_solves} perfect solves")
+                        console.print(f"  • {progress.total_score} points")
+                        console.print(f"  • {len(progress.challenges_completed)} completed challenges")
+                        response = Prompt.ask("\n[bold red]Are you sure you want to delete all progress?[/bold red] Type 'yes' to confirm", default="no")
+                        if response.lower() == 'yes':
+                            challenge_env.scorer.reset_progress()
+                            console.print("\n[green]✓ All challenge progress has been cleared.[/green]")
+                            console.print("[dim]You can start fresh with all challenges.[/dim]")
+                        else:
+                            console.print("[yellow]Progress deletion cancelled.[/yellow]")
+                
+                elif cmd == 'help':
+                    console.print("\n[bold cyan]Challenge Commands:[/bold cyan]\n")
+                    console.print("  [cyan].list [filter][/cyan]  - List challenges (filter: easy|medium|hard)")
+                    console.print("  [cyan].start <id>[/cyan]    - Start a challenge")
+                    console.print("  [cyan].submit[/cyan]        - Submit current query")
+                    console.print("  [cyan].stats[/cyan]         - Show statistics")
+                    console.print("  [cyan].progress[/cyan]      - Show progress")
+                    console.print("  [cyan].rank[/cyan]          - Show rank")
+                    console.print("  [cyan].reset[/cyan]         - Reset current challenge")
+                    console.print("  [cyan].clear-all[/cyan]     - Delete all challenge progress")
+                    console.print("  [cyan].help[/cyan]          - Show this help")
+                    console.print("  [cyan]:exit[/cyan]          - Exit challenge environment\n")
+                    console.print("[dim]Examples:[/dim]")
+                    console.print("  [dim].list          - Show all challenges[/dim]")
+                    console.print("  [dim].list easy     - Show only easy challenges[/dim]")
+                    console.print("  [dim].list medium    - Show only medium challenges[/dim]")
+                    console.print("  [dim].list hard     - Show only hard challenges[/dim]\n")
+                
+                else:
+                    console.print(f"[red]Unknown command: {cmd}[/red]")
+                    console.print("[dim]Type .help for available commands[/dim]")
+                continue
+            
+            # Execute SQL query in challenge context
+            current_challenge = challenge_env.get_current_challenge()
+            if not current_challenge:
+                console.print("[yellow]No active challenge. Use [cyan].start <id>[/cyan] to begin.[/yellow]")
+                continue
+            
+            storage = challenge_env.get_storage()
+            if not storage:
+                console.print("[red]Challenge database not available[/red]")
+                continue
+            
+            # Store query for potential submission
+            last_query = query
+            
+            try:
+                # Validate query against challenge constraints
+                query_upper = query.strip().upper()
+                
+                # Check for blocked operations
+                blocked_ops = ['DROP', 'ALTER', 'PRAGMA']
+                if any(query_upper.startswith(op) for op in blocked_ops):
+                    console.print(f"[red]Operation not allowed in challenge mode: {query_upper.split()[0]}[/red]")
+                    console.print("[dim]Challenge mode only allows SELECT queries and specified operations.[/dim]")
+                    continue
+                
+                # Execute query
+                results = storage.execute(query)
+                
+                # Show results
+                if results:
+                    visualizer.show_results(results)
+                else:
+                    console.print("\n[green]✓ Query executed successfully.[/green]")
+                    console.print("[dim]💡 Use [cyan].submit[/cyan] to submit your solution[/dim]")
+                
+            except Exception as e:
+                # Use friendly error messages
+                error_msg = challenge_env.evaluator.get_friendly_error_message(str(e))
+                console.print(f"\n[bold red]Error:[/bold red] {error_msg}")
+        
+        except KeyboardInterrupt:
+            console.print("\n\n[yellow]Interrupted. Use :exit to quit challenge mode.[/yellow]")
+        except EOFError:
+            challenge_env.exit()
+            break
 
 
 def main():

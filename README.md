@@ -1,92 +1,131 @@
-# TermiBase 🚀
+# TermiBase
 
-A terminal-native database learning playground that lets you run SQL queries and observe how they're parsed, planned, and executed—all from your command line.
+A terminal-based SQL learning and exam-preparation environment designed to simulate the workflow and constraints of SQL*Plus, while adding clarity, safety, and guided understanding.
 
-**Install in one command:** `brew install tejgokani/termibase/termibase` or `pip install termibase`  
-**Use immediately:** Just type `termibase` and start querying!
+**Install:** `brew install tejgokani/termibase/termibase` or `pip install termibase`  
+**Use:** `termibase`
 
-## 🎯 What is TermiBase?
+## What TermiBase Is and Is Not
 
-TermiBase is an educational tool designed to help developers understand database internals by providing:
-- **Interactive SQL REPL** with real-time query analysis
-- **Multi-line query support** (SQL*Plus style) - write queries across multiple lines
-- **Command history** with arrow key navigation (↑↓)
-- **Execution plan visualization** showing how queries are processed step-by-step
-- **Query optimization suggestions** to learn best practices
-- **Interactive learning mode** (`.learn`) with guided SQL lessons
-- **Commit/rollback tracking** to manage database changes
-- **Beautiful terminal UI** using Rich for a modern CLI experience
-- **No browser required** - everything runs in your terminal
+**TermiBase IS:**
+- A learning tool for SQL syntax and query construction
+- A practice environment for SQL*Plus-style terminal workflows
+- An exam-preparation aid for Oracle SQL*Plus environments
+- A safe sandbox for experimenting with SQL queries
 
-## 🚀 Quick Start
+**TermiBase IS NOT:**
+- A production database client or DBA tool
+- A query optimizer or performance analysis tool
+- A replacement for professional database tools (psql, mysql client, etc.)
+- A tool for understanding physical database internals
+
+## Quick Start
 
 ### Installation
 
-**Option 1: Homebrew (Strictly for macOS and Linux)**
-```bash
-brew tap tejgokani/termibase
-brew install termibase
-```
-
-Or in one command:
+**macOS/Linux (Homebrew):**
 ```bash
 brew install tejgokani/termibase/termibase
 ```
 
-**Option 2: pip (Strictly for Windows)**
+**Windows (pip):**
 ```bash
 pip install termibase
+python -m termibase_setup  # Adds to PATH
 ```
 
-**Windows Easy Setup (Makes `termibase` command work):**
-After installing with pip, run the setup helper to automatically add to PATH:
-```cmd
-python -m termibase_setup
-```
-
-This will automatically find and add Python Scripts to your PATH so `termibase` command works!
-
-**Option 3: pip3**
-```bash
-pip3 install termibase
-```
-
-**Option 4: pipx (Recommended for CLI tools)**
+**All Platforms (pipx - Recommended):**
 ```bash
 pipx install termibase
 ```
 
 ### First Use
 
-**macOS/Linux:**
 ```bash
 termibase
 ```
 
-**Windows:**
-```bash
-termibase
-```
-
-
-
-The database will be automatically initialized on first run. You'll see:
+The database initializes automatically. You'll see:
 
 ```
 ✨ TermiBase - Your Database Learning Playground
 
-💡 Tip: Type SQL queries to see how they're executed step-by-step
+💡 Type SQL queries to see how they're executed step-by-step
    Use .help for commands, .exit to quit
-   Write multi-line queries (end with ';') or use arrow keys for history
 
 termibase> 
 ```
 
-## 📖 Features
+## Operating Modes
 
-### 1. Multi-Line Query Input
+TermiBase supports different modes for different learning contexts:
 
-Write SQL queries across multiple lines, just like SQL*Plus:
+### Practice Mode (Default)
+
+SQL*Plus-like minimal output. Queries execute and return results without additional analysis.
+
+- Minimal output: query results only
+- Execution plan visualization: disabled by default (toggle with `.explain`)
+- Suitable for: building muscle memory, practicing SQL*Plus workflows
+
+### Learning Mode
+
+Enhanced output with explanations and conceptual visualizations.
+
+- Query analysis: shows query structure and components
+- Conceptual execution flow: logical visualization of query processing order
+- Hints and suggestions: guidance on query construction
+- Suitable for: understanding SQL syntax, learning query structure
+
+Enable learning features:
+```bash
+termibase> .explain  # Toggle execution plan display
+termibase> .learn    # Interactive SQL lessons
+```
+
+### Exam Simulation Mode
+
+Strict mode that mirrors SQL*Plus behavior for exam preparation.
+
+- No hints or suggestions
+- Minimal output matching SQL*Plus defaults
+- Strict error handling
+- Suitable for: preparing for Oracle SQL*Plus exams
+
+Enter via challenge environment:
+```bash
+termibase> .challenge
+challenge> .start <id>
+```
+
+## Key Features
+
+### 1. SQL Challenge Environment
+
+Practice with 200 unique SQL challenges:
+
+```bash
+termibase> .challenge
+
+🎯 Challenge Environment
+💡 Type .help for available commands
+💡 Type :exit to return to main REPL
+
+challenge> .list          # List all challenges
+challenge> .start 1       # Start challenge #1
+challenge> .submit        # Submit your solution
+challenge> .stats         # View your progress
+```
+
+**Challenge Features:**
+- 50 Easy, 75 Medium, 75 Hard challenges
+- Each challenge has unique problem statement and solution
+- Progress tracking and scoring system
+- Exam-like constraints (no DROP, ALTER operations)
+
+### 2. Multi-Line Query Input
+
+Write SQL queries across multiple lines (SQL*Plus style):
 
 ```sql
 termibase> SELECT DISTINCT
@@ -98,16 +137,35 @@ termibase> SELECT DISTINCT
       -> WHERE c.city = 'Lethbridge';
 ```
 
-End your query with `;` to execute. Use `\` on an empty line to cancel.
+End with `;` to execute. Use `\` on empty line to cancel.
 
-### 2. Command History
+### 3. Conceptual Execution Flow Visualization
 
-Navigate your query history using arrow keys:
-- **↑** - Previous query
-- **↓** - Next query
-- History is saved to `.termibase_history` and persists across sessions
+**Important:** This feature shows logical query processing order, not physical database execution.
 
-### 3. Interactive Learning Mode
+When enabled (`.explain`), TermiBase displays a conceptual visualization of how SQL queries are logically processed:
+
+```
+Conceptual Execution Flow
+├── [1] TABLE_SCAN - Scanning table users (conceptual)
+├── [2] FILTER - Applying WHERE filter: age > 28 (conceptual)
+└── [3] PROJECT - Projecting all columns (conceptual)
+```
+
+**This is NOT:**
+- Real execution cost from the database engine
+- Physical execution plan from SQLite
+- Accurate row count estimates
+- Performance optimization guidance
+
+**This IS:**
+- A logical representation of SQL processing order
+- A teaching aid for understanding query structure
+- A visualization of how SQL clauses relate to each other
+
+See the "Accuracy & Transparency" section for details.
+
+### 4. Interactive Learning Mode
 
 Learn SQL interactively with guided lessons:
 
@@ -115,83 +173,35 @@ Learn SQL interactively with guided lessons:
 termibase> .learn
 ```
 
-**Available Topics:**
-1. SELECT Basics
-2. WHERE Clause
-3. JOINs
-4. GROUP BY & Aggregation
-5. ORDER BY
-6. Subqueries
-7. Indexes & Performance
+**Topics:** SELECT Basics, WHERE Clause, JOINs, GROUP BY, ORDER BY, Subqueries
 
-Each lesson includes:
-- Detailed explanations
-- Example queries
-- Practice queries you can run
-- Option to write your own queries
+### 5. Transaction Management
 
-### 4. Commit/Rollback Tracking
-
-TermiBase tracks uncommitted changes and prompts you to save before exiting:
+Track database changes with commit/rollback:
 
 ```sql
-termibase> INSERT INTO users (name, age, city) VALUES ('Alice', 25, 'NYC');
-✓ Query executed successfully.
+termibase> INSERT INTO users (name, age) VALUES ('Alice', 25);
 💡 Use .commit to save changes or .rollback to discard
 
 termibase> .commit
 ✓ Changes committed successfully
 ```
 
-**Commands:**
-- `.commit` - Save pending changes
-- `.rollback` - Discard pending changes
-
-If you try to exit with uncommitted changes, you'll be prompted to commit.
-
-### 5. Query Analysis & Visualization
-
-Every query is automatically analyzed and visualized:
-
-```sql
-termibase> SELECT * FROM users WHERE age > 28;
-```
-
-**Shows:**
-- Query structure (tables, columns, WHERE conditions)
-- Execution plan (step-by-step processing)
-- Query results (beautifully formatted tables)
-- Optimization suggestions
-
-### 6. Execution Plan Visualization
-
-See how your query is executed internally:
-
-```
-Execution Plan
-Query Execution
-├── [1] TABLE_SCAN - Scanning table users (cost: 1.00, rows: 8)
-├── [2] FILTER - Applying WHERE filter: age > 28 (cost: 0.30, rows: 4)
-└── [3] PROJECT - Projecting all columns (cost: 0.20, rows: 4)
-```
-
-## 📚 REPL Commands
-
-Inside the TermiBase REPL, use these commands:
+## REPL Commands
 
 | Command | Description |
 |---------|-------------|
 | `.help` | Show all available commands |
+| `.challenge` | Enter SQL challenge environment |
 | `.learn` | Interactive SQL learning mode |
-| `.explain` | Toggle execution plan display on/off |
+| `.explain` | Toggle conceptual execution flow display |
 | `.commit` | Commit pending database changes |
-| `.rollback` | Rollback pending database changes |
-| `.tables` | List all tables in the database |
+| `.rollback` | Rollback pending changes |
+| `.tables` | List all tables |
 | `.schema` | Show table schemas |
-| `.examples` | Show example queries |
 | `.exit` or `.quit` | Exit REPL |
 
-## 🎮 Usage Examples
+## Usage Examples
 
 ### Basic Queries
 
@@ -211,230 +221,161 @@ FROM users u
 JOIN orders o ON u.id = o.user_id;
 ```
 
-### Multi-Line Complex Query
-
-```sql
-termibase> SELECT DISTINCT
-      ->     c.customer_id,
-      ->     c.first_name,
-      ->     c.last_name,
-      ->     c.email,
-      ->     s.store_id
-      -> FROM rental r
-      -> INNER JOIN staff st ON st.staff_id = r.staff_id
-      -> INNER JOIN store s ON s.manager_staff_id = st.staff_id 
-      ->     AND s.store_id = st.store_id
-      -> INNER JOIN customer c ON r.customer_id = c.customer_id 
-      ->     AND s.store_id = c.store_id
-      -> INNER JOIN address a ON s.address_id = a.address_id
-      -> INNER JOIN city ci ON ci.city_id = a.city_id
-      -> WHERE ci.city = 'Lethbridge';
-```
-
-### Using Learning Mode
+### Challenge Environment
 
 ```bash
-termibase> .learn
-
-📚 SQL Learning Topics
-
-#  Topic                        Description
-─────────────────────────────────────────────────────────────────────
-1  SELECT Basics               Learn the fundamentals of SELECT queries
-2  WHERE Clause                Filter data using WHERE conditions
-3  JOINs                       Combine data from multiple tables
-4  GROUP BY & Aggregation      Group data and use aggregate functions
-5  ORDER BY                    Sort query results
-6  Subqueries                  Nested queries and subqueries
-7  Indexes & Performance       Understand indexes and query optimization
-
-Select a topic (1-7) or 'q' to quit: 3
-
-📖 JOINs
-
-Explanation:
-JOINs combine rows from two or more tables.
-
-Types:
-  • INNER JOIN - Returns matching rows from both tables
-  • LEFT JOIN - Returns all rows from left table + matching from right
-  ...
-
-Options:
-  1 - Run practice query
-  2 - Write your own query
-  3 - See execution plan
-  4 - Back to topics
+termibase> .challenge
+challenge> .list                    # View all challenges
+challenge> .list easy               # Filter by difficulty
+challenge> .start 42                # Start challenge #42
+challenge> SELECT * FROM ...        # Write your solution
+challenge> .submit                  # Submit and check
+challenge> .stats                   # View progress
+challenge> :exit                    # Return to main REPL
 ```
 
-## 🛠️ Command-Line Commands
+## Command-Line Commands
 
-### `termibase` (No Arguments)
-Launches interactive REPL - the main way to use TermiBase.
+### `termibase`
+Launch interactive REPL (main interface).
 
 ```bash
 termibase
 ```
 
 ### `termibase init`
-Initialize or reset the sandbox database with demo data.
+Initialize or reset the sandbox database.
 
 ```bash
 termibase init
 termibase init --db-path ./my-db.db
 ```
 
-### `termibase repl`
-Explicitly launch REPL (same as `termibase`).
-
-```bash
-termibase repl
-termibase repl --explain  # Always show execution plans
-```
-
 ### `termibase run`
-Execute a single query with full visualization.
+Execute a single query with optional visualization.
 
 ```bash
 termibase run "SELECT * FROM users WHERE age > 25"
-termibase run "SELECT * FROM users" --no-explain  # Skip execution plan
+termibase run "SELECT * FROM users" --no-explain  # Results only
 ```
 
 ### `termibase explain`
-Show execution plan for a query without running it.
+Show conceptual execution flow without running query.
 
 ```bash
 termibase explain "SELECT * FROM users JOIN orders ON users.id = orders.user_id"
 ```
 
-### `termibase demo`
-Run educational demo queries.
+## Demo Data
 
-```bash
-termibase demo              # Run all demos
-termibase demo basics       # Run specific demo
-```
+Pre-loaded tables:
+- **users** - `id`, `name`, `age`, `city`
+- **orders** - `id`, `user_id`, `amount`, `date`
 
-## 🎓 Demo Data
+## How TermiBase Differs from Oracle SQL*Plus
 
-TermiBase comes with pre-loaded demo data:
+### What SQL*Plus Does Poorly for Students
 
-**Users Table:**
-- `id` (INTEGER PRIMARY KEY)
-- `name` (TEXT)
-- `age` (INTEGER)
-- `city` (TEXT)
+- **Cryptic error messages:** SQL*Plus errors are often unhelpful for beginners
+- **No query structure feedback:** Students can't see how their query is parsed
+- **No safe experimentation:** Easy to accidentally modify or drop data
+- **Minimal learning support:** No guided lessons or practice challenges
+- **Hostile defaults:** Verbose output and complex configuration
 
-**Orders Table:**
-- `id` (INTEGER PRIMARY KEY)
-- `user_id` (INTEGER, FOREIGN KEY)
-- `amount` (REAL)
-- `date` (TEXT)
+### What TermiBase Intentionally Improves
 
-**Indexes:**
-- `idx_users_city` on `users(city)`
-- `idx_orders_user_id` on `orders(user_id)`
+- **Clear error messages:** Friendly explanations of SQL syntax errors
+- **Query analysis:** Shows how queries are structured and parsed
+- **Safe sandbox:** Isolated environment for experimentation
+- **Guided learning:** Interactive lessons and structured challenges
+- **Progressive disclosure:** Start simple, enable advanced features as needed
 
-## 🏗️ Architecture
+### What TermiBase Intentionally Does NOT Change
 
-TermiBase is built with a modular architecture:
+- **Terminal-first workflow:** Maintains SQL*Plus command-line interface
+- **Multi-line input:** Preserves SQL*Plus continuation prompt style
+- **Command structure:** Uses dot-commands (`.help`, `.exit`) similar to SQL*Plus
+- **Result presentation:** Table output format matches SQL*Plus conventions
+
+## Accuracy & Transparency
+
+### Conceptual Visualizations
+
+TermiBase's execution flow visualizations are **conceptual teaching aids**, not accurate representations of physical database execution.
+
+**What they show:**
+- Logical order of SQL clause processing (FROM → WHERE → SELECT, etc.)
+- Relationships between query components
+- How different SQL constructs relate to each other
+
+**What they do NOT show:**
+- Actual execution costs from the database engine
+- Real row count estimates
+- Physical execution plans (index usage, scan types, etc.)
+- Performance characteristics
+
+### Physical Execution Behavior
+
+Physical execution behavior depends entirely on the database engine (SQLite in TermiBase's case). The database engine:
+- Chooses execution strategies based on available indexes
+- Estimates costs using its own statistics
+- Optimizes queries according to its internal algorithms
+
+**Students should not:**
+- Generalize conceptual flow as physical execution
+- Use conceptual visualizations for query optimization
+- Assume costs or row counts reflect real database behavior
+
+**Students should:**
+- Use conceptual visualizations to understand SQL syntax and structure
+- Learn physical execution from database-specific tools (SQLite's `EXPLAIN QUERY PLAN`, PostgreSQL's `EXPLAIN`, etc.)
+- Practice SQL*Plus workflows for exam preparation
+
+### Implementation Notes
+
+- Execution flow visualization uses heuristics and simulation, not database engine output
+- Query analysis is based on SQL parsing, not execution metadata
+- Suggestions are educational guidance, not optimization recommendations
+
+## Architecture
 
 ```
 termibase/
-├── cli/          # Command-line interface (Typer)
-│   ├── main.py    # Main CLI commands
-│   └── input_handler.py  # Multi-line input & history
-├── parser/        # SQL parsing and analysis
-├── engine/       # Query execution simulation
+├── cli/          # Command-line interface
+├── parser/       # SQL parsing and analysis
+├── engine/       # Query execution simulation (conceptual)
 ├── visualizer/   # Rich-based terminal rendering
 ├── storage/      # SQLite wrapper
-├── learn/        # Interactive learning module
-└── demos/        # Educational examples
+├── challenge/    # SQL challenge environment
+└── learn/        # Interactive learning module
 ```
 
-### Key Components
-
-- **CLI Interface**: Handles commands, flags, and REPL loop
-- **Input Handler**: Multi-line query input with readline history support
-- **SQL Parser**: Parses SQL into tokens and AST using `sqlparse`
-- **Query Analyzer**: Identifies query type, tables, indexes, joins
-- **Execution Simulator**: Simulates logical execution steps
-- **Storage Engine**: SQLite wrapper for actual query execution
-- **Visualizer**: Renders execution plans and results using Rich
-- **Learning Module**: Interactive SQL lessons and practice
-
-## 📚 Educational Features
-
-### Query Analysis
-Every query is analyzed to show:
-- Query type (SELECT, INSERT, UPDATE, DELETE)
-- Tables involved
-- Columns selected
-- WHERE conditions
-- JOIN operations
-- GROUP BY and ORDER BY clauses
-- LIMIT values
-
-### Execution Visualization
-See how your query is executed:
-- **Table scans** vs **index scans**
-- **Filter operations** for WHERE clauses
-- **Join strategies** (INNER, LEFT, etc.)
-- **Sorting** for ORDER BY
-- **Grouping** for GROUP BY
-- **Cost estimates** for each step
-
-### Optimization Suggestions
-Get tips on improving your queries:
-- Index recommendations
-- Full table scan warnings
-- Large result set alerts
-- Join optimization hints
-
-## 🔧 Development
-
-### Setup Development Environment
+## Development
 
 ```bash
-# Clone repository
+# Clone and setup
 git clone https://github.com/tejgokani/TermiBase.git
 cd TermiBase
-
-# Create virtual environment
 python3 -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
-
-# Install in editable mode
+source venv/bin/activate
 pip install -e .
-```
 
-### Running Tests
-
-```bash
+# Run tests
 pytest termibase/tests/
 ```
 
-## 🎨 Design Philosophy
+## Requirements
 
-- **Terminal-first**: Everything works in the terminal, no browser needed
-- **Educational**: Transparent about how queries are processed
-- **Fast feedback**: Immediate visualization of query execution
-- **Developer-centric**: Built for developers learning databases
-- **Interactive**: Multi-line queries, history, and guided learning
-- **Safe**: Commit/rollback tracking prevents accidental data loss
-
-## 📝 Requirements
-
-- Python 3.8 or higher
+- Python 3.8+
 - SQLite (included with Python)
 
-## 🌐 Platform Support
+## Platform Support
 
-- ✅ **macOS** - Install via Homebrew or pip. Use `termibase` command.
-- ✅ **Linux** - Install via pip or pipx. Use `termibase` command.
-- ✅ **Windows** - Install via pip. Use `python -m termibase` (recommended) or add Scripts to PATH for `termibase` command.
+- ✅ **macOS** - Homebrew or pip
+- ✅ **Linux** - pip or pipx
+- ✅ **Windows** - pip (use `python -m termibase` or add to PATH)
 
-## 🔄 Update TermiBase
+## Update
 
 **Homebrew:**
 ```bash
@@ -446,39 +387,18 @@ brew upgrade termibase
 pip install --upgrade termibase
 ```
 
-## 🗑️ Uninstall
+## Built With
 
-**Homebrew:**
-```bash
-brew uninstall termibase
-```
-
-**pip:**
-```bash
-pip uninstall termibase
-```
-
-## License
-
-TermiBase is **source-available**.
-You are free to use and study the code, but modification and redistribution
-are not permitted without explicit permission.
-
-
-
-## 🙏 Acknowledgments
-
-Built with:
-- [Typer](https://typer.tiangolo.com/) - Modern CLI framework
-- [Rich](https://rich.readthedocs.io/) - Beautiful terminal output
+- [Typer](https://typer.tiangolo.com/) - CLI framework
+- [Rich](https://rich.readthedocs.io/) - Terminal output
 - [sqlparse](https://github.com/andialbrecht/sqlparse) - SQL parsing
-- [SQLite](https://www.sqlite.org/) - Embedded database
+- [SQLite](https://www.sqlite.org/) - Database
 
-## 📞 Support
+## Support
 
 - **Issues**: [GitHub Issues](https://github.com/tejgokani/TermiBase/issues)
 - **Documentation**: This README
 
 ---
 
-**Happy Learning!** 🎉
+**Happy Learning!**

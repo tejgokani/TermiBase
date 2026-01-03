@@ -92,7 +92,8 @@ class QueryInputHandler:
                     continue
                 
                 # Check for special commands (only on first line)
-                if not lines and line.strip().startswith('.'):
+                # Handle dot commands (.) and colon commands (:)
+                if not lines and (line.strip().startswith('.') or line.strip().startswith(':')):
                     # Add to history if not empty
                     if line.strip():
                         self.history.append(line.strip())

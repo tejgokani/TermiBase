@@ -40,6 +40,13 @@ ENV/
 *.sqlite
 *.sqlite3
 .termibase/
+.termibase_history
+termibase/challenge/challenges.json
+challenges_*.json
+*_challenge.py
+generate_*.py
+test_*.py
+demo_*.py
 
 # Testing
 .pytest_cache/
