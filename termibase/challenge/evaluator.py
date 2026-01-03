@@ -76,7 +76,8 @@ class ChallengeEvaluator:
                 match_result = self._compare_results(
                     user_results_normalized,
                     challenge.expected_result,
-                    db_path
+                    db_path,
+                    challenge
                 )
                 
                 details['result_match'] = match_result['matches']
@@ -228,7 +229,8 @@ class ChallengeEvaluator:
         self,
         user_results: List[Tuple],
         expected: Dict[str, Any],
-        db_path: str
+        db_path: str,
+        challenge: Optional[Challenge] = None
     ) -> Dict[str, Any]:
         """Compare user results with expected results.
         
@@ -236,6 +238,7 @@ class ChallengeEvaluator:
             user_results: Normalized user query results
             expected: Expected result specification
             db_path: Path to database (for executing reference queries)
+            challenge: Challenge object (for solution query comparison)
             
         Returns:
             Dictionary with comparison results
@@ -245,6 +248,48 @@ class ChallengeEvaluator:
             'expected_rows': 0,
             'details': []
         }
+        
+        # If solution_query exists, compare by executing it
+        if challenge and challenge.solution_query:
+            try:
+                conn = sqlite3.connect(db_path)
+                conn.row_factory = sqlite3.Row
+                try:
+                    solution_results = conn.execute(challenge.solution_query).fetchall()
+                    solution_results_normalized = self._normalize_results(solution_results)
+                    
+                    # Compare row counts
+                    if len(user_results) != len(solution_results_normalized):
+                        result['details'].append(
+                            f'Row count mismatch: expected {len(solution_results_normalized)}, got {len(user_results)}'
+                        )
+                        result['expected_rows'] = len(solution_results_normalized)
+                        return result
+                    
+                    # Compare actual data (order-independent set comparison)
+                    user_set = set(user_results)
+                    solution_set = set(solution_results_normalized)
+                    
+                    if user_set == solution_set:
+                        result['matches'] = True
+                        result['expected_rows'] = len(solution_results_normalized)
+                    else:
+                        result['details'].append('Result data does not match solution')
+                        result['expected_rows'] = len(solution_results_normalized)
+                        # Show what's missing or extra
+                        missing = solution_set - user_set
+                        extra = user_set - solution_set
+                        if missing:
+                            result['details'].append(f'Missing rows: {len(missing)}')
+                        if extra:
+                            result['details'].append(f'Extra rows: {len(extra)}')
+                    
+                    return result
+                finally:
+                    conn.close()
+            except Exception as e:
+                result['details'].append(f'Error executing solution query: {str(e)}')
+                # Fall through to other comparison methods
         
         if expected['type'] == 'query_result':
             # Compare row count
@@ -290,6 +335,15 @@ class ChallengeEvaluator:
             # For other cases, if row count matches and no specific checks, assume match
             if 'rows' in expected and len(user_results) == expected['rows']:
                 result['matches'] = True
+            
+            # If no specific validation criteria and no solution_query comparison happened,
+            # and we have results, we need to check if solution_query exists
+            # (This case should have been handled above, but as fallback)
+            if not result['matches'] and challenge and challenge.solution_query:
+                # This should have been handled in the solution_query comparison above
+                # But if we reach here, it means solution_query comparison failed
+                # So we'll mark as incorrect
+                pass
             
             # Check for specific query characteristics
             if 'has_join' in expected and expected['has_join']:
