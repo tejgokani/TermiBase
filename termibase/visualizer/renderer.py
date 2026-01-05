@@ -8,11 +8,14 @@ from rich.tree import Tree
 from rich.text import Text
 from rich.syntax import Syntax
 from termibase.engine.simulator import ExecutionStep
-from termibase.parser.analyzer import QueryAnalyzer
 
 
 class QueryVisualizer:
-    """Visualizes query execution plans and results."""
+    """Visualizes execution plans and results.
+
+    Note: Query structure analysis has been removed to keep output minimal and
+    closer to a traditional SQL*Plus-style experience.
+    """
 
     def __init__(self):
         """Initialize visualizer."""
@@ -24,69 +27,12 @@ class QueryVisualizer:
             self.terminal_width = 80
 
     def show_query_analysis(self, query: str) -> None:
-        """Display query analysis.
-        
-        Args:
-            query: SQL query string
+        """Previously displayed query analysis.
+
+        This method is now a no-op to disable the visual \"Query Analysis\"
+        panel and table while keeping the public API stable.
         """
-        analyzer = QueryAnalyzer(query)
-        analysis = analyzer.analyze()
-        
-        # Show parsed query
-        self.console.print("\n[bold cyan]Query Analysis[/bold cyan]")
-        # Use Panel with proper width handling to prevent overlap
-        # Calculate safe width (leave margins for borders, padding, and title)
-        safe_width = min(self.terminal_width - 8, 120)  # Leave 8 chars for margins and title
-        syntax = Syntax(query, "sql", theme="monokai", word_wrap=True, line_numbers=False)
-        # Use Panel.fit() to auto-adjust to content, preventing overlap
-        panel = Panel.fit(syntax, 
-                         title="[bold blue]SQL Query[/bold blue]", 
-                         border_style="blue",
-                         padding=(1, 2))
-        # Ensure it doesn't exceed terminal width
-        if safe_width < self.terminal_width:
-            self.console.print(panel, width=safe_width)
-        else:
-            self.console.print(panel)
-        
-        # Create analysis table with width constraints
-        safe_width = min(self.terminal_width - 4, 120)
-        table = Table(title="Query Structure", show_header=True, header_style="bold magenta", 
-                     width=safe_width, show_lines=False)
-        table.add_column("Property", style="cyan", width=20, overflow="fold")
-        table.add_column("Value", style="green", overflow="fold")
-        
-        table.add_row("Query Type", analysis['type'])
-        table.add_row("Tables", ", ".join(analysis['tables']) if analysis['tables'] else "None")
-        table.add_row("Columns", ", ".join(analysis['columns']) if analysis['columns'] else "*")
-        
-        if analysis['where_conditions']:
-            table.add_row("WHERE Conditions", " AND ".join(analysis['where_conditions']))
-        else:
-            table.add_row("WHERE Conditions", "None")
-        
-        if analysis['joins']:
-            join_str = ", ".join([f"{j['type']} {j['table']}" for j in analysis['joins']])
-            table.add_row("JOINs", join_str)
-        else:
-            table.add_row("JOINs", "None")
-        
-        if analysis['group_by']:
-            table.add_row("GROUP BY", ", ".join(analysis['group_by']))
-        else:
-            table.add_row("GROUP BY", "None")
-        
-        if analysis['order_by']:
-            table.add_row("ORDER BY", ", ".join(analysis['order_by']))
-        else:
-            table.add_row("ORDER BY", "None")
-        
-        if analysis['limit']:
-            table.add_row("LIMIT", str(analysis['limit']))
-        else:
-            table.add_row("LIMIT", "None")
-        
-        self.console.print(table)
+        return
 
     def show_execution_plan(self, steps: List[ExecutionStep]) -> None:
         """Display execution plan as a tree.

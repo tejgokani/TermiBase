@@ -2,9 +2,9 @@
 class Termibase < Formula
   desc "A terminal-native database learning playground"
   homepage "https://github.com/tejgokani/TermiBase"
-  url "https://github.com/tejgokani/TermiBase/archive/refs/tags/v0.2.2.tar.gz"
-  sha256 "2bf83e5e9a2139b4fbe36690e0ed28997ae6725ec253774a7f6192a29027a0e2"
-  version "0.2.2"
+  url "https://github.com/tejgokani/TermiBase/archive/refs/tags/v0.2.3.tar.gz"
+  sha256 "UPDATE_ME_WITH_REAL_SHA256_FOR_V0_2_3"
+  version "0.2.3"
   license "MIT"
 
   depends_on "python@3.11"
